@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ตรวจสอบแบตเขย่ง EV ประเทศไทย</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap');
+        body { font-family: 'Noto Sans Thai', system-ui, sans-serif; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 to-slate-200 min-h-screen py-8">
+    <div class="max-w-xl mx-auto px-4">
+        <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200">
+            
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-red-600 to-rose-600 p-8 text-center text-white">
+                <i class="fa-solid fa-battery-three-quarters text-6xl mb-4"></i>
+                <h1 class="text-4xl font-bold">ตรวจสอบแบตเขย่ง</h1>
+                <p class="text-red-100 mt-2 text-lg">รถยนต์ไฟฟ้าในประเทศไทย</p>
+            </div>
+
+            <div class="p-8 space-y-8">
+                <!-- คำเตือน -->
+                <div class="bg-amber-50 border border-amber-300 rounded-2xl p-6">
+                    <h3 class="font-semibold text-amber-800 mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation"></i> 
+                        ปัญหา "แบตเขย่ง"
+                    </h3>
+                    <p class="text-amber-700 text-sm">SOH% สูง แต่ชาร์จไฟได้จริงน้อยกว่าที่ควรอย่างชัดเจน</p>
+                </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">เลือกยี่ห้อและรุ่นรถ</label>
+                        <select id="car_model" onchange="updateCapacity()" 
+                                class="w-full px-6 py-4 bg-white border border-slate-300 rounded-2xl text-slate-800 text-base focus:outline-none focus:border-red-500">
+                            <option value="">-- เลือกรุ่นรถ --</option>
+                            <optgroup label="ORA">
+                                <option value="63.1" data-type="NMC" selected>ORA Good Cat Ultra - 63.1 kWh NMC</option>
+                                <option value="57.7" data-type="LFP">ORA Good Cat - 57.7 kWh LFP</option>
+                                <option value="47.8" data-type="LFP">ORA Good Cat - 47.8 kWh LFP</option>
+                            </optgroup>
+                            <optgroup label="BYD">
+                                <option value="63" data-type="LFP">BYD Atto 3 - 63 kWh LFP</option>
+                                <option value="60.48" data-type="LFP">BYD Dolphin - 60.48 kWh LFP</option>
+                                <option value="82" data-type="LFP">BYD Seal - 82 kWh LFP</option>
+                            </optgroup>
+                            <optgroup label="Tesla">
+                                <option value="60" data-type="LFP">Tesla Model 3 RWD - 60 kWh LFP</option>
+                                <option value="71.8" data-type="NMC">Tesla Model 3 LR - 71.8 kWh</option>
+                                <option value="78.4" data-type="NMC">Tesla Model Y LR - 78.4 kWh</option>
+                            </optgroup>
+                            <optgroup label="อื่นๆ">
+                                <option value="72" data-type="LFP">MG4 Electric - 72 kWh LFP</option>
+                                <option value="64" data-type="LFP">MG ZS EV - 64 kWh LFP</option>
+                                <option value="87" data-type="NMC">Hyundai IONIQ 5 - 87 kWh</option>
+                                <option value="custom">อื่นๆ (กรอกเอง)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">พลังงานที่ชาร์จจริง (kWh)</label>
+                            <input id="actual_kwh" type="number" step="0.01" placeholder="39.5" 
+                                   class="w-full px-5 py-4 bg-white border border-slate-300 rounded-2xl text-lg text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">เปอร์เซ็นต์ที่เพิ่มขึ้น (%)</label>
+                            <input id="percent" type="number" step="0.1" placeholder="65" 
+                                   class="w-full px-5 py-4 bg-white border border-slate-300 rounded-2xl text-lg text-slate-800">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">ความจุตามสเปค (kWh)</label>
+                        <input id="nominal_capacity" type="number" step="0.01" value="63.1" 
+                               class="w-full px-5 py-4 bg-white border border-slate-300 rounded-2xl text-lg text-slate-800">
+                    </div>
+
+                    <button onclick="calculateSOH()" 
+                            class="w-full bg-red-600 hover:bg-red-700 py-5 rounded-2xl text-white font-semibold text-lg transition-all">
+                        คำนวณ SOH และตรวจสอบความผิดปกติ
+                    </button>
+                </div>
+
+                <!-- ผลลัพธ์ -->
+                <div id="result" class="hidden mt-8 bg-emerald-50 border border-emerald-200 rounded-3xl p-8">
+                    <div class="text-center">
+                        <p class="text-emerald-700 text-sm font-medium">สุขภาพแบตเตอรี่ (SOH)</p>
+                        <div id="soh_display" class="text-7xl font-bold text-emerald-600">87.9</div>
+                        <p class="text-emerald-600 text-2xl">%</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-8 mt-8">
+                        <div class="text-center">
+                            <p class="text-slate-500 text-sm">ความจุจริง</p>
+                            <p id="capacity_display" class="text-3xl font-semibold text-slate-800">55.46 kWh</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-slate-500 text-sm">ความสูญเสีย</p>
+                            <p id="loss_display" class="text-3xl font-semibold text-red-600">7.64 kWh</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="error" class="hidden mt-6 text-red-600 text-center font-medium"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateCapacity() {
+            const select = document.getElementById('car_model');
+            const nominal = document.getElementById('nominal_capacity');
+            if (select.value && select.value !== "custom") {
+                nominal.value = select.value;
+            }
+        }
+
+        function calculateSOH() {
+            const actual = parseFloat(document.getElementById('actual_kwh').value);
+            const percent = parseFloat(document.getElementById('percent').value);
+            const nominal = parseFloat(document.getElementById('nominal_capacity').value);
+
+            if (!actual || !percent || !nominal) {
+                showError("กรุณากรอกข้อมูลให้ครบถ้วน");
+                return;
+            }
+
+            const realCapacity = actual / (percent / 100);
+            const soh = (realCapacity / nominal) * 100;
+            const loss = nominal - realCapacity;
+
+            document.getElementById('soh_display').textContent = soh.toFixed(1);
+            document.getElementById('capacity_display').textContent = realCapacity.toFixed(2) + " kWh";
+            document.getElementById('loss_display').textContent = loss.toFixed(2) + " kWh";
+            
+            document.getElementById('result').classList.remove('hidden');
+        }
+
+        function showError(msg) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = msg;
+            errorDiv.classList.remove('hidden');
+        }
+
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') calculateSOH();
+        });
+    </script>
+</body>
+</html>
